@@ -22,10 +22,10 @@ import numpy as np
 import tensorflow as tf
 import random
 
-NUM_EMB = 51
+NUM_EMB = 36
 EMB_DIM = 20
 HIDDEN_DIM = 25
-SEQ_LENGTH = 144
+SEQ_LENGTH = 96
 START_TOKEN = 0
 
 EPOCH_ITER = 1000
