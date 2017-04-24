@@ -10,7 +10,7 @@ LASTLEADSHEET = 300
 MAXMIDI = 89
 MINMIDI = 55
 CHORDLENGTH = 12
-SAVEFILE = 'processedData.npz'
+SAVEFILE = 'justNotesAdjusted.npz'
 SEQUENCELENGTH = 192
 
 def findMaxAndMin():
@@ -42,21 +42,29 @@ def main():
         path = os.path.join(DATADIR, "{:04}.ls".format(i))
         chords, melody = leadsheet.parse_leadsheet(path)
         currentSequence = []
-        for j in range(len(chords)):
-            chord = chords[j]
-            chordSequence = leadsheet.rotate(chord[1], chord[0])
-            currentSequence.append(chordSequence)
+        # for j in range(len(chords)):
+        #     chord = chords[j]
+        #     chordSequence = leadsheet.rotate(chord[1], chord[0])
+        #     currentSequence.append(chordSequence)
 
         currentSequencePoint = 0
         for j in range(len(melody)):
             note = melody[j]
             for k in range(note[1]):
-                if k == 0:
-                    attackAndSustain = [1, 0]
-                else:
-                    attackAndSustain = [0, 1]
+                # if k == 0:
+                #     attackAndSustain = [1, 0]
+                # else:
+                #     attackAndSustain = [0, 1]
 
-                currentSequence[currentSequencePoint] += midiToOneHot(note[0]) + attackAndSustain
+                # currentSequence[currentSequencePoint] += midiToOneHot(note[0]) + attackAndSustain
+                if note[0] == None:
+                    midi = 90
+                else:
+                    midi = note[0]
+                if midi-55 == 0:
+                    currentSequence.append(1)
+                else:
+                    currentSequence.append(midi - 55)
                 currentSequencePoint += 1
 
         trainingData.append(currentSequence)
