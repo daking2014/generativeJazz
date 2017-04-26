@@ -5,7 +5,6 @@ sys.path.append('/home/mccolgan/PyCharm Projects/keras')
 from keras.models import Sequential
 from keras.layers.core import Dense,Dropout
 from keras.optimizers import SGD
-from keras.initializations import normal
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.stats import gaussian_kde
@@ -14,7 +13,9 @@ import theano.tensor as T
 import theano
 import pydub
 
-batch_size = 128*128
+batch_size = 96 # 16384
+seq_length = 192 # 32768
+dec_input_num = 10
 
 print("loading data")
 
@@ -28,12 +29,14 @@ print("loading data")
 # data /= data.max() / 2.
 # data -= 1.
 # print(data.shape)
+data = np.load('justNotes.npz')['data']
+print(data.shape)
 
 print("Setting up decoder")
 decoder = Sequential()
-decoder.add(Dense(2048, input_dim=32768, activation='relu'))
+decoder.add(Dense(dec_input_num, input_dim=seq_length, activation='relu'))
 decoder.add(Dropout(0.5))
-decoder.add(Dense(1024, activation='relu'))
+decoder.add(Dense(int(dec_input_num*0.5), activation='relu'))
 decoder.add(Dropout(0.5))
 decoder.add(Dense(1, activation='sigmoid'))
 
@@ -42,9 +45,9 @@ decoder.compile(loss='binary_crossentropy', optimizer=sgd)
 
 print("Setting up generator")
 generator = Sequential()
-generator.add(Dense(2048*2, input_dim=2048, activation='relu'))
-generator.add(Dense(1024*8, activation='relu'))
-generator.add(Dense(32768, activation='linear'))
+generator.add(Dense(dec_input_num*2, input_dim=dec_input_num, activation='relu'))
+generator.add(Dense(int(dec_input_num*0.5)*8, activation='relu'))
+generator.add(Dense(seq_length, activation='linear'))
 
 generator.compile(loss='binary_crossentropy', optimizer=sgd)
 
@@ -104,21 +107,22 @@ def gaussian_likelihood(X, u=0., s=1.):
 
 fig = plt.figure()
 
-for i in range(100000):
+for i in range(10000):
     print i
-    zmb = np.random.uniform(-1, 1, size=(batch_size, 2048)).astype('float32')
-    xmb = np.random.normal(1., 1, size=(batch_size, 1)).astype('float32')
-    # xmb = np.array([data[n:n+32768] for n in np.random.randint(0,data.shape[0]-32768,batch_size)])
+    zmb = np.random.uniform(0, 36, size=(batch_size, dec_input_num)).astype('float32')
+    # xmb = np.random.normal(1., 1, size=(batch_size, 1)).astype('float32')
+    # xmb = np.array([data[n:n+seq_length] for n in np.random.randint(0,data.shape[0]-seq_length,batch_size)])
+    xmb = np.array([data[n, :] for n in np.random.randint(0, data.shape[0], batch_size)])
     if i % 10 == 0:
-        r = gen_dec.fit(zmb,y_gen_dec,nb_epoch=1,verbose=0)
-        print('E:',np.exp(r.totals['loss']/batch_size))
+        r = gen_dec.fit(zmb,y_gen_dec,epochs=1,verbose=0)
+        print('E:',np.exp(sum(r.history['loss'])/batch_size))
     else:
-        r = decoder.fit(np.vstack([generator.predict(zmb),xmb]),y_decode,nb_epoch=1,verbose=0)
-        print('D:',np.exp(r.totals['loss']/batch_size))
-    if i % 100 == 0:
+        r = decoder.fit(np.vstack([generator.predict(zmb),xmb]),y_decode,epochs=1,verbose=0)
+        print('D:',np.exp(sum(r.history['loss'])/batch_size))
+    if i % 1000 == 0:
         print("saving fakes")
         fakes = generator.predict(zmb[:16,:])
         for n in range(16):
-            wavfile.write('fake_'+str(n+1)+'.wav',44100,fakes[n,:])
-            wavfile.write('real_'+str(n+1)+'.wav',44100,xmb[n,:])
+            np.save('simpleResults\\fake_'+str(i)+"_"+str(n+1), fakes[n, :])
+            np.save('simpleResults\\real_'+str(i)+"_"+str(n+1), xmb[n, :])
 #        vis(i)
