@@ -1,5 +1,6 @@
 # Simple GAN implementation with keras
 # adaptation of https://gist.github.com/Newmu/4ee0a712454480df5ee3
+# https://github.com/phreeza/keras-GAN/blob/master/simple_gan.py
 import sys
 sys.path.append('/home/mccolgan/PyCharm Projects/keras')
 from keras.models import Sequential
@@ -15,7 +16,7 @@ import pydub
 
 batch_size = 96 # 16384
 seq_length = 192 # 32768
-dec_input_num = 10
+dec_input_num = 100
 
 print("loading data")
 
@@ -54,6 +55,8 @@ generator.compile(loss='binary_crossentropy', optimizer=sgd)
 print("Setting up combined net")
 gen_dec = Sequential()
 gen_dec.add(generator)
+for l in decoder.layers:
+    l.trainable = False
 decoder.trainable=False
 gen_dec.add(decoder)
 
@@ -113,12 +116,13 @@ for i in range(10000):
     # xmb = np.random.normal(1., 1, size=(batch_size, 1)).astype('float32')
     # xmb = np.array([data[n:n+seq_length] for n in np.random.randint(0,data.shape[0]-seq_length,batch_size)])
     xmb = np.array([data[n, :] for n in np.random.randint(0, data.shape[0], batch_size)])
+    print(zmb.shape, xmb.shape)
     if i % 10 == 0:
         r = gen_dec.fit(zmb,y_gen_dec,epochs=1,verbose=0)
-        print('E:',np.exp(sum(r.history['loss'])/batch_size))
+        print('E:',np.exp(r.history['loss'][-1]))
     else:
         r = decoder.fit(np.vstack([generator.predict(zmb),xmb]),y_decode,epochs=1,verbose=0)
-        print('D:',np.exp(sum(r.history['loss'])/batch_size))
+        print('D:',np.exp(r.history['loss'][-1]))
     if i % 1000 == 0:
         print("saving fakes")
         fakes = generator.predict(zmb[:16,:])

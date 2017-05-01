@@ -8,19 +8,19 @@ def main():
         data = np.load(directory + "\\" + f)
         c = [(0, [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1])]*192
         m = []
-        prevNote = data[0]
+        prevNote = int(round(data[0]))
         currentDuration = 0
         for n in range(len(data)):
-            if data[n] == prevNote:
+            if int(round(data[n])) == prevNote:
                 currentDuration += 1
             else:
-                if prevNote == 36:
+                if prevNote == 35:
                     noteToAppend = None
                 else:
-                    noteToAppend = prevNote
+                    noteToAppend = int(round(prevNote)) + 55
                 m.append((noteToAppend, currentDuration))
 
-                prevNote = data[n]
+                prevNote = int(round(data[n]))
                 currentDuration = 1
         leadsheet.write_leadsheet(c, m, filename=".\\leadsheetResults\\"+f+".ls")
 

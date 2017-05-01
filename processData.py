@@ -62,7 +62,7 @@ def main():
                 else:
                     midi = note[0]
                 if midi-55 == 0:
-                    currentSequence.append(1)
+                    currentSequence.append(midi-55)
                 else:
                     currentSequence.append(midi - 55)
                 currentSequencePoint += 1
