@@ -59,6 +59,7 @@ def parse_chord(cstr,verbose=False):
     Given a string representation of a chord, return a binary representation
     as a list of length 12, starting with C.
     """
+
     if cstr == "NC":
         return 0, constants.CHORD_TYPES["NC"]
     chord_match = re.match(r"([A-G](?:#|b)?)(.*)", cstr)
@@ -176,6 +177,7 @@ def parse_leadsheet(fn,verbose=False):
     # repeat_print(chords)
     # print "Parsed melody: "
     # pprint(melody)
+    # print(chords)
 
     clen = len(chords)
     mlen = sum(dur for n,dur in melody)
@@ -302,7 +304,7 @@ def write_chords(chords):
     Convert a list of chords to a string
     """
     whole_dir = constants.WHOLE//constants.RESOLUTION_SCALAR
-
+    validChord = False
     parts = []
     for measure in chunkwise(chords, whole_dir):
         partial_measure = []
@@ -317,6 +319,7 @@ def write_chords(chords):
                     chord_str = "NC"
                 else:
                     if ctype in list(constants.CHORD_TYPES.values()):
+                        validChord = True
                         t_idx = list(constants.CHORD_TYPES.values()).index(ctype)
                         ctype_s = list(constants.CHORD_TYPES.keys())[t_idx]
 
@@ -325,7 +328,7 @@ def write_chords(chords):
 
                         chord_str = root_s + ctype_s
                     else:
-                        print("Not a valid chord!")
+                        # print("Not a valid chord!")
                         chord_str = "NC"
 
                 partial_measure.append([chord_str, 1])
@@ -336,12 +339,13 @@ def write_chords(chords):
                 parts.append(chord_str)
         parts.append("|")
 
-    return " ".join(parts)
+    return " ".join(parts), validChord
 
 def write_leadsheet(chords, melody, filename=None):
     """
     Convert chords and a melody to a leadsheet file
     """
+    chordResults, validChord = write_chords(chords)
     full_leadsheet = """
 (section (style swing))
 
@@ -349,8 +353,9 @@ def write_leadsheet(chords, melody, filename=None):
 {}
 (part (type melody))
 {}
-""".format(write_chords(chords), write_melody(melody))
-
+""".format(chordResults, write_melody(melody))
+    if validChord:
+        print filename
     if filename is not None:
         with open(filename,'w') as f:
             f.write(full_leadsheet)

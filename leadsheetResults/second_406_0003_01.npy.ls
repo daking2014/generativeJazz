@@ -1,0 +1,7 @@
+
+(section (style swing))
+
+(part (type chords))
+NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC | NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC NC |
+(part (type melody))
+a32/3 f32/3 g32/3 f16 a8 e16/3 g8/3 bb8 f8 g8 r16/3 g32/3 ab-32/3 g32/3 e8/3+32/3+16/3 ab8 f32/3 ab16 f16/3 e16/3 g32/3 e8+16 f4 ab8 gb32/3 f32/3 bb32/3

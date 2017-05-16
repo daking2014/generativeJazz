@@ -1,7 +1,6 @@
 # Simple GAN implementation with keras
 # adaptation of https://gist.github.com/Newmu/4ee0a712454480df5ee3
 import sys
-sys.path.append('/home/mccolgan/PyCharm Projects/keras')
 from keras.models import Sequential
 from keras import layers
 from keras.layers.core import Dense,Dropout
@@ -13,6 +12,7 @@ from scipy.io import wavfile
 import theano.tensor as T
 import theano
 import pydub
+from keras.utils import np_utils
 
 batch_size = 96 # 16384
 seq_length = 192 # 32768
@@ -30,7 +30,9 @@ print("loading data")
 # data /= data.max() / 2.
 # data -= 1.
 # print(data.shape)
-data = np.load('justNotes.npz')['data']
+data = np.load('justNotesSplit.npz')['X']
+y = np.load('justNotesSplit.npz')['y']
+y = np_utils.to_categorical(y)
 print(data.shape)
 
 print("Setting up decoder")
@@ -39,14 +41,19 @@ decoder.add(Dense(dec_input_num, input_dim=seq_length, activation='relu'))
 decoder.add(Dropout(0.5))
 decoder.add(Dense(int(dec_input_num*0.5), activation='relu'))
 decoder.add(Dropout(0.5))
-decoder.add(Dense(1, activation='sigmoid'))
+decoder.add(Dense(y.shape[1], activation='sigmoid'))
 
 sgd = SGD(lr=0.01, momentum=0.1)
 decoder.compile(loss='binary_crossentropy', optimizer=sgd)
 
 print("Setting up generator")
 generator = Sequential()
-generator.add(layers.LSTM(seq_length, input_shape=(dec_input_num, 1)))
+# model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2])))
+# model.add(Dropout(0.2))
+# model.add(Dense(y.shape[1], activation='softmax'))
+generator.add(layers.LSTM(100, input_shape=(50, 1)))
+generator.add(Dropout(0.2))
+generator.add(Dense(y.shape[1], activation='softmax'))
 
 generator.compile(loss='binary_crossentropy', optimizer=sgd)
 
@@ -114,6 +121,7 @@ for i in range(epochs+1):
     zmb = np.random.uniform(0, 36, size=(batch_size, dec_input_num, 1)).astype('float32')
     # xmb = np.random.normal(1., 1, size=(batch_size, 1)).astype('float32')
     # xmb = np.array([data[n:n+seq_length] for n in np.random.randint(0,data.shape[0]-seq_length,batch_size)])
+    X = numpy.reshape(data, (len(data), 50, 1))
     xmb = np.array([data[n, :] for n in np.random.randint(0, data.shape[0], batch_size)])
     if i % 10 == 0:
         r = gen_dec.fit(zmb,y_gen_dec,epochs=1,verbose=0)
