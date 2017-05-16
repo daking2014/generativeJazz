@@ -1,1 +1,13 @@
-Hello
+### File descriptions
+- DCGAN-tensorflow-modified: Code for DCGAN taken from https://github.com/carpedm20/DCGAN-tensorflow and modified to work with our dataset
+- ii-V-I_leadsheets: Training dataset taken from https://github.com/Impro-Visor/adversarial_music
+- leadsheetResults: Folder for storing results of converting output arrays to leadsheets
+- ofirnachum: **This folder is not up to date** Code for a recurrent sequence gan taken from https://github.com/ofirnachum/sequence_gan with some modifications. More modifications will be pushed at a later date.
+- resultsToKeep: Folder containg leadsheet results used in the presentation of this project
+- simpleResults: Folder for storing output of networks
+- *.npz: different representations of the dataset as numpy arrays
+- constants.py, leadsheet.py: Helper files taken from https://github.com/Impro-Visor/adversarial_music
+- createLeadsheets.py: Creates leadsheets from the files in a given folder
+- generateRandom.py: Generates a random output sequence
+- processData.py: Creates a .npz data file from the training dataset
+- singleNoteDense.py: A simple dense gan, based on https://github.com/phreeza/keras-GAN
